@@ -122,67 +122,67 @@ jobs:
         make
         popd
 
-    # - name: Ship artifacts
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #   run: |
-    #     FRIDA_VERSION="${{ needs.check.outputs.FRIDA_VERSION }}"
-    #     gh_release_put(){ curl -fs -H "Authorization: token ${GITHUB_TOKEN}" -H "Content-Type: application/octet-stream" -o /dev/null --data-binary "@${1}" "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${{ needs.create.outputs.RELEASE_ID }}/assets?name=${2}"; }
+    - name: Ship artifacts
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        FRIDA_VERSION="${{ needs.check.outputs.FRIDA_VERSION }}"
+        gh_release_put(){ curl -fs -H "Authorization: token ${GITHUB_TOKEN}" -H "Content-Type: application/octet-stream" -o /dev/null --data-binary "@${1}" "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${{ needs.create.outputs.RELEASE_ID }}/assets?name=${2}"; }
 
-    #     export XZ_OPT="-9e -T0" ZSTD_NBTHREADS=0 ZSTD_CLEVEL=19
-    #     ZSTD_OPT="-${ZSTD_CLEVEL:-22} --ultra -T${ZSTD_NBTHREADS:-0}" LZIP_OPT="-n$(nproc) -9" PIGZ="-p$(nproc) -11"  # GZIP="-9" PIGZ="${GZIP}"
-    #     #for compr in "xz ${XZ_OPT}:xz" "plzip ${LZIP_OPT}:lz"; do  # "pigz ${PIGZ}:gz" "zstd ${ZSTD_OPT}:zst"; do …; done
-    #     compr="xz ${XZ_OPT}:xz"
+        export XZ_OPT="-9e -T0" ZSTD_NBTHREADS=0 ZSTD_CLEVEL=19
+        ZSTD_OPT="-${ZSTD_CLEVEL:-22} --ultra -T${ZSTD_NBTHREADS:-0}" LZIP_OPT="-n$(nproc) -9" PIGZ="-p$(nproc) -11"  # GZIP="-9" PIGZ="${GZIP}"
+        #for compr in "xz ${XZ_OPT}:xz" "plzip ${LZIP_OPT}:lz"; do  # "pigz ${PIGZ}:gz" "zstd ${ZSTD_OPT}:zst"; do …; done
+        compr="xz ${XZ_OPT}:xz"
 
-    #     pushd frida
-    #     gh_release_put subprojects/frida-core/src/anti-anti-frida.py anti-anti-frida.py ||:
+        pushd frida
+        gh_release_put subprojects/frida-core/src/anti-anti-frida.py anti-anti-frida.py ||:
 
-    #     for j in server inject; do  # bin
-    #       #upx --lzma --best "build/frida-${{ matrix.os }}-${{ matrix.arch }}/bin/frida-${j}"
+        for j in server inject; do  # bin
+          #upx --lzma --best "build/frida-${{ matrix.os }}-${{ matrix.arch }}/bin/frida-${j}"
 
-    #       #_src="build/frida-${{ matrix.os }}-${{ matrix.arch }}/bin/frida-${j}"
-    #       _src="build/subprojects/frida-core/${j}/frida-${j}"
-    #       ${compr%:*} -k "${_src}"
-    #       gh_release_put "${_src}.${compr#*:}" "${GITHUB_REPOSITORY##*/}-${j}-${FRIDA_VERSION}-${{ matrix.os }}-${{ matrix.arch }}.${compr#*:}"
-    #     done
-    #     python subprojects/frida-core/src/anti-anti-frida.py build/subprojects/frida-core/server/frida-server
-    #     mv build/subprojects/frida-core/server/frida-server ../frida-server-${{ matrix.arch }}
+          #_src="build/frida-${{ matrix.os }}-${{ matrix.arch }}/bin/frida-${j}"
+          _src="build/subprojects/frida-core/${j}/frida-${j}"
+          ${compr%:*} -k "${_src}"
+          gh_release_put "${_src}.${compr#*:}" "${GITHUB_REPOSITORY##*/}-${j}-${FRIDA_VERSION}-${{ matrix.os }}-${{ matrix.arch }}.${compr#*:}"
+        done
+        # python subprojects/frida-core/src/anti-anti-frida.py build/subprojects/frida-core/server/frida-server
+        mv build/subprojects/frida-core/server/frida-server ../frida-server-${{ matrix.arch }}
 
-    #     #[ "$(echo ${{ matrix.arch }} | sed 's/64$//')" != "${{ matrix.arch }}" ] && bit_width=64 || bit_width=32
-    #     #upx --lzma --best "build/frida-${{ matrix.os }}-${{ matrix.arch }}/lib/frida/${bit_width}/frida-gadget.so"
-    #     #_src="build/frida-${{ matrix.os }}-${{ matrix.arch }}/lib/frida/${bit_width}/frida-gadget.so"
+        #[ "$(echo ${{ matrix.arch }} | sed 's/64$//')" != "${{ matrix.arch }}" ] && bit_width=64 || bit_width=32
+        #upx --lzma --best "build/frida-${{ matrix.os }}-${{ matrix.arch }}/lib/frida/${bit_width}/frida-gadget.so"
+        #_src="build/frida-${{ matrix.os }}-${{ matrix.arch }}/lib/frida/${bit_width}/frida-gadget.so"
 
-    #     _src="build/subprojects/frida-core/lib/gadget/frida-gadget.so"
-    #     ${compr%:*} -k "${_src}"
-    #     gh_release_put "${_src}.${compr#*:}" "${GITHUB_REPOSITORY##*/}-gadget-${FRIDA_VERSION}-${{ matrix.os }}-${{ matrix.arch }}.so.${compr#*:}"
+        _src="build/subprojects/frida-core/lib/gadget/frida-gadget.so"
+        ${compr%:*} -k "${_src}"
+        gh_release_put "${_src}.${compr#*:}" "${GITHUB_REPOSITORY##*/}-gadget-${FRIDA_VERSION}-${{ matrix.os }}-${{ matrix.arch }}.so.${compr#*:}"
 
-    #     #python subprojects/frida-core/src/anti-anti-frida.py "${_src}"
-    #     rm "${_src}.${compr#*:}"; ${compr%:*} -k "${_src}"
-    #     mv "${_src}.${compr#*:}" "../libgadget-${{ matrix.arch }}.so.${compr#*:}"
+        #python subprojects/frida-core/src/anti-anti-frida.py "${_src}"
+        rm "${_src}.${compr#*:}"; ${compr%:*} -k "${_src}"
+        mv "${_src}.${compr#*:}" "../libgadget-${{ matrix.arch }}.so.${compr#*:}"
 
-    #     for j in $(find build/subprojects -iname '*-example.c'); do  # devkit
-    #       _j="${j##*/}"
-    #       _tar="build/${_j%-example.c}-devkit-${{ matrix.os }}-${{ matrix.arch }}.tar"
-    #       #_tgt="${GITHUB_REPOSITORY##*/}-${j}-devkit-${FRIDA_VERSION}-${{ matrix.os }}-${{ matrix.arch }}.tar.${compr#*:}"
-    #       _tgt="undetected-${_j%-example.c}-devkit-${FRIDA_VERSION}-${{ matrix.os }}-${{ matrix.arch }}.tar.${compr#*:}"
+        for j in $(find build/subprojects -iname '*-example.c'); do  # devkit
+          _j="${j##*/}"
+          _tar="build/${_j%-example.c}-devkit-${{ matrix.os }}-${{ matrix.arch }}.tar"
+          #_tgt="${GITHUB_REPOSITORY##*/}-${j}-devkit-${FRIDA_VERSION}-${{ matrix.os }}-${{ matrix.arch }}.tar.${compr#*:}"
+          _tgt="undetected-${_j%-example.c}-devkit-${FRIDA_VERSION}-${{ matrix.os }}-${{ matrix.arch }}.tar.${compr#*:}"
 
-    #       tar -cf "${_tar}" -C "${j%/*}" .
+          tar -cf "${_tar}" -C "${j%/*}" .
 
-    #       ${compr%:*} -k "${_tar}"
-    #       gh_release_put "${_tar}.${compr#*:}" "${_tgt}"
-    #     done
-    #     popd
+          ${compr%:*} -k "${_tar}"
+          gh_release_put "${_tar}.${compr#*:}" "${_tgt}"
+        done
+        popd
 
-    # - name: Pass artifacts for modules
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: frida-artifacts-${{ matrix.arch }}
-    #     path: |
-    #       frida-server-${{ matrix.arch }}
-    #       libgadget-${{ matrix.arch }}.so*
-    #     if-no-files-found: warn
-    #     retention-days: 1
-    #     compression-level: 9
+    - name: Pass artifacts for modules
+      uses: actions/upload-artifact@v4
+      with:
+        name: frida-artifacts-${{ matrix.arch }}
+        path: |
+          frida-server-${{ matrix.arch }}
+          libgadget-${{ matrix.arch }}.so*
+        if-no-files-found: warn
+        retention-days: 1
+        compression-level: 9
 
   publish:
     runs-on: ubuntu-22.04
