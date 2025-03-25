@@ -12,9 +12,8 @@ jobs:
     - name: Check for existing release
       id: check
       run: |
-        frida_version="$(curl -fs https://api.github.com/repos/frida/frida/releases | jq -r .[].tag_name | sort -nr | head -n1)"
-        frida_version="$(curl -fs https://api.github.com/repos/frida/frida/releases/latest | jq -r .tag_name)"
-        echo "FRIDA_VERSION=${frida_version}" >> "${GITHUB_OUTPUT}"  # gh env?
+        frida_version="16.4.7"
+        echo "FRIDA_VERSION=${frida_version}" >> "${GITHUB_OUTPUT}"
 
         release_exists=0
         set +e
