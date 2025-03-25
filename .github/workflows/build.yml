@@ -12,7 +12,7 @@ jobs:
     - name: Check for existing release
       id: check
       run: |
-        frida_version="16.4.7"
+        frida_version="16.6.6"
         echo "FRIDA_VERSION=${frida_version}" >> "${GITHUB_OUTPUT}"
 
         release_exists=0
